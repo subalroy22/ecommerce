@@ -95,8 +95,6 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $this->authorize('view', $product);
-
         $product->load(['category', 'brand', 'images']);
 
         // Get related products from same category

@@ -1,9 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ApplicationLogo from '@/Components/ApplicationLogo';
+import Dropdown from '@/Components/Dropdown';
+import NavLink from '@/Components/NavLink';
+import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import ProductCard from '@/Components/ProductCard';
 import PrimaryButton from '@/Components/PrimaryButton';
+import { useState } from 'react';
 
-export default function Show({ product, relatedProducts }) {
+export default function Show({ auth, product, relatedProducts }) {
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const user = auth.user;
+    const isAdmin = user && (user.role === 'admin' || user.role === 'manager');
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -12,21 +20,170 @@ export default function Show({ product, relatedProducts }) {
     };
 
     return (
-        <AuthenticatedLayout>
+        <div className="min-h-screen bg-gray-100">
             <Head title={product.name} />
+
+            <nav className="border-b border-gray-100 bg-white">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="flex h-16 justify-between">
+                        <div className="flex">
+                            <div className="flex shrink-0 items-center">
+                                <Link href="/">
+                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
+                                </Link>
+                            </div>
+
+                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                {user ? (
+                                    <>
+                                        <NavLink href={route('dashboard')} active={route().current('dashboard')}>
+                                            Dashboard
+                                        </NavLink>
+                                        <NavLink href={route('home')} active={route().current('home')}>
+                                            Store
+                                        </NavLink>
+                                        {isAdmin && (
+                                            <>
+                                                <NavLink href={route('admin.products.index')} active={route().current('admin.products.*')}>
+                                                    Manage Products
+                                                </NavLink>
+                                                <NavLink href={route('admin.categories.index')} active={route().current('admin.categories.*')}>
+                                                    Manage Categories
+                                                </NavLink>
+                                                <NavLink href={route('admin.brands.index')} active={route().current('admin.brands.*')}>
+                                                    Manage Brands
+                                                </NavLink>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    <NavLink href={route('home')} active={route().current('home')}>
+                                        Store
+                                    </NavLink>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                            {user ? (
+                                <div className="relative ms-3">
+                                    <Dropdown>
+                                        <Dropdown.Trigger>
+                                            <span className="inline-flex rounded-md">
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                >
+                                                    {user.name}
+                                                    <svg className="-me-0.5 ms-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </span>
+                                        </Dropdown.Trigger>
+                                        <Dropdown.Content>
+                                            <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                            <Dropdown.Link href={route('logout')} method="post" as="button">
+                                                Log Out
+                                            </Dropdown.Link>
+                                        </Dropdown.Content>
+                                    </Dropdown>
+                                </div>
+                            ) : (
+                                <div className="flex items-center space-x-4">
+                                    <Link href={route('login')} className="rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+                                        Log in
+                                    </Link>
+                                    <Link href={route('register')} className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500">
+                                        Sign up
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="-me-2 flex items-center sm:hidden">
+                            <button
+                                onClick={() => setShowingNavigationDropdown((prev) => !prev)}
+                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
+                            >
+                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                    <path className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                                    <path className={showingNavigationDropdown ? 'inline-flex' : 'hidden'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
+                    <div className="space-y-1 pb-3 pt-2">
+                        {user ? (
+                            <>
+                                <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
+                                    Dashboard
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('home')} active={route().current('home')}>
+                                    Store
+                                </ResponsiveNavLink>
+                                {isAdmin && (
+                                    <>
+                                        <ResponsiveNavLink href={route('admin.products.index')} active={route().current('admin.products.*')}>
+                                            Manage Products
+                                        </ResponsiveNavLink>
+                                        <ResponsiveNavLink href={route('admin.categories.index')} active={route().current('admin.categories.*')}>
+                                            Manage Categories
+                                        </ResponsiveNavLink>
+                                        <ResponsiveNavLink href={route('admin.brands.index')} active={route().current('admin.brands.*')}>
+                                            Manage Brands
+                                        </ResponsiveNavLink>
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <ResponsiveNavLink href={route('home')} active={route().current('home')}>
+                                Store
+                            </ResponsiveNavLink>
+                        )}
+                    </div>
+
+                    <div className="border-t border-gray-200 pb-1 pt-4">
+                        {user ? (
+                            <>
+                                <div className="px-4">
+                                    <div className="text-base font-medium text-gray-800">{user.name}</div>
+                                    <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                                </div>
+                                <div className="mt-3 space-y-1">
+                                    <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
+                                    <ResponsiveNavLink method="post" href={route('logout')} as="button">
+                                        Log Out
+                                    </ResponsiveNavLink>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="mt-3 space-y-1">
+                                <ResponsiveNavLink href={route('login')}>Log in</ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('register')}>Sign up</ResponsiveNavLink>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </nav>
+
+            <main>
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     {/* Breadcrumb */}
                     <nav className="mb-6 flex text-sm text-gray-500">
-                        <Link href={route('products.index')} className="hover:text-gray-700">
-                            Products
+                        <Link href={route('home')} className="hover:text-gray-700">
+                            Home
                         </Link>
                         <span className="mx-2">/</span>
                         {product.category && (
                             <>
                                 <Link 
-                                    href={route('categories.show', product.category.slug)} 
+                                    href={route('category.show', product.category.slug)} 
                                     className="hover:text-gray-700"
                                 >
                                     {product.category.name}
@@ -60,7 +217,7 @@ export default function Show({ product, relatedProducts }) {
                                 
                                 {product.brand && (
                                     <Link 
-                                        href={route('brands.show', product.brand.slug)}
+                                        href={route('brand.show', product.brand.slug)}
                                         className="mt-2 inline-block text-sm text-indigo-600 hover:text-indigo-800"
                                     >
                                         {product.brand.name}
@@ -99,12 +256,21 @@ export default function Show({ product, relatedProducts }) {
 
                                 {/* Add to Cart Button */}
                                 <div className="mt-8">
-                                    <PrimaryButton
-                                        disabled={product.stock_quantity === 0}
-                                        className="w-full justify-center"
-                                    >
-                                        Add to Cart
-                                    </PrimaryButton>
+                                    {user ? (
+                                        <PrimaryButton
+                                            disabled={product.stock_quantity === 0}
+                                            className="w-full justify-center"
+                                        >
+                                            Add to Cart
+                                        </PrimaryButton>
+                                    ) : (
+                                        <Link
+                                            href={route('login')}
+                                            className="inline-flex w-full items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                        >
+                                            Log in to Add to Cart
+                                        </Link>
+                                    )}
                                 </div>
 
                                 {/* Product Meta */}
@@ -119,7 +285,7 @@ export default function Show({ product, relatedProducts }) {
                                                 <dt className="text-sm font-medium text-gray-500">Category</dt>
                                                 <dd className="mt-1 text-sm text-gray-900">
                                                     <Link 
-                                                        href={route('categories.show', product.category.slug)}
+                                                        href={route('category.show', product.category.slug)}
                                                         className="text-indigo-600 hover:text-indigo-800"
                                                     >
                                                         {product.category.name}
@@ -146,6 +312,7 @@ export default function Show({ product, relatedProducts }) {
                     )}
                 </div>
             </div>
-        </AuthenticatedLayout>
+            </main>
+        </div>
     );
 }
