@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import DataTable from '@/Components/DataTable';
 import PrimaryButton from '@/Components/PrimaryButton';
 
@@ -68,22 +68,18 @@ export default function Index({ categories, filters }) {
     );
 
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Category Management
-                    </h2>
-                    <Link href={route('admin.categories.create')}>
-                        <PrimaryButton>Add Category</PrimaryButton>
-                    </Link>
-                </div>
-            }
+        <AdminLayout
+            header="Category Management"
         >
             <Head title="Category Management" />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="mb-6 flex justify-end">
+                        <Link href={route('admin.categories.create')}>
+                            <PrimaryButton>Add Category</PrimaryButton>
+                        </Link>
+                    </div>
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6">
                             <DataTable
@@ -123,6 +119,6 @@ export default function Index({ categories, filters }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

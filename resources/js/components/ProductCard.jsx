@@ -10,7 +10,7 @@ export default function ProductCard({ product }) {
 
     return (
         <Link
-            href={route('products.show', product.slug)}
+            href={route('product.show', product.slug)}
             className="group block overflow-hidden rounded-lg bg-white shadow transition hover:shadow-lg"
         >
             {/* Product Image */}

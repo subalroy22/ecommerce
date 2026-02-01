@@ -38,10 +38,21 @@ class ProductController extends Controller
         ]);
 
         $products = $this->productService->getAllProducts($filters);
+        
+        // Check if this is an admin route by checking the route name
+        if ($request->route()->getName() === 'admin.products.index') {
+            // Admin view - return paginated products with relationships
+            return Inertia::render('Admin/Products/Index', [
+                'products' => $products,
+                'filters' => $filters,
+            ]);
+        }
+        
+        // Home/Storefront view - return products with categories and brands for filtering
         $categories = $this->categoryService->getAllCategories(['is_active' => true]);
         $brands = $this->brandService->getAllBrands(['is_active' => true]);
 
-        return Inertia::render('Products/Index', [
+        return Inertia::render('Home', [
             'products' => $products,
             'categories' => $categories,
             'brands' => $brands,

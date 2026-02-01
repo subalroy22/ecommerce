@@ -5,7 +5,7 @@ import SearchBar from '@/Components/SearchBar';
 
 export default function Show({ category, products, filters }) {
     const handleSearch = (searchTerm) => {
-        router.get(route('categories.show', category.slug), { ...filters, search: searchTerm }, {
+        router.get(route('category.show', category.slug), { ...filters, search: searchTerm }, {
             preserveState: true,
             preserveScroll: true,
         });
@@ -13,7 +13,7 @@ export default function Show({ category, products, filters }) {
 
     const handleSortChange = (e) => {
         const [sortBy, sortOrder] = e.target.value.split('-');
-        router.get(route('categories.show', category.slug), {
+        router.get(route('category.show', category.slug), {
             ...filters,
             sort_by: sortBy,
             sort_order: sortOrder,
@@ -31,14 +31,14 @@ export default function Show({ category, products, filters }) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     {/* Breadcrumb */}
                     <nav className="mb-6 flex text-sm text-gray-500">
-                        <Link href={route('products.index')} className="hover:text-gray-700">
-                            Products
+                        <Link href={route('home')} className="hover:text-gray-700">
+                            Home
                         </Link>
                         <span className="mx-2">/</span>
                         {category.parent && (
                             <>
                                 <Link 
-                                    href={route('categories.show', category.parent.slug)} 
+                                    href={route('category.show', category.parent.slug)} 
                                     className="hover:text-gray-700"
                                 >
                                     {category.parent.name}
@@ -65,7 +65,7 @@ export default function Show({ category, products, filters }) {
                                 {category.children.map((child) => (
                                     <Link
                                         key={child.id}
-                                        href={route('categories.show', child.slug)}
+                                        href={route('category.show', child.slug)}
                                         className="rounded-lg border border-gray-200 bg-white p-4 text-center transition hover:border-indigo-500 hover:shadow-md"
                                     >
                                         <h3 className="font-medium text-gray-900">{child.name}</h3>

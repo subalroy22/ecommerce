@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
+    const isAdmin = user && (user.role === 'admin' || user.role === 'manager');
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -30,6 +31,34 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    href={route('home')}
+                                    active={route().current('home')}
+                                >
+                                    Store
+                                </NavLink>
+                                {isAdmin && (
+                                    <>
+                                        <NavLink
+                                            href={route('admin.products.index')}
+                                            active={route().current('admin.products.*')}
+                                        >
+                                            Manage Products
+                                        </NavLink>
+                                        <NavLink
+                                            href={route('admin.categories.index')}
+                                            active={route().current('admin.categories.*')}
+                                        >
+                                            Manage Categories
+                                        </NavLink>
+                                        <NavLink
+                                            href={route('admin.brands.index')}
+                                            active={route().current('admin.brands.*')}
+                                        >
+                                            Manage Brands
+                                        </NavLink>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -134,6 +163,34 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('home')}
+                            active={route().current('home')}
+                        >
+                            Store
+                        </ResponsiveNavLink>
+                        {isAdmin && (
+                            <>
+                                <ResponsiveNavLink
+                                    href={route('admin.products.index')}
+                                    active={route().current('admin.products.*')}
+                                >
+                                    Manage Products
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('admin.categories.index')}
+                                    active={route().current('admin.categories.*')}
+                                >
+                                    Manage Categories
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('admin.brands.index')}
+                                    active={route().current('admin.brands.*')}
+                                >
+                                    Manage Brands
+                                </ResponsiveNavLink>
+                            </>
+                        )}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">

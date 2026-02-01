@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import InputError from '@/Components/InputError';
@@ -27,12 +27,8 @@ export default function Edit({ product, categories, brands }) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Edit Product: {product.name}
-                </h2>
-            }
+        <AdminLayout
+            header={`Edit Product: ${product.name}`}
         >
             <Head title={`Edit ${product.name}`} />
 
@@ -198,6 +194,6 @@ export default function Edit({ product, categories, brands }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

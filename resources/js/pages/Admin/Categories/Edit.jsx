@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import InputError from '@/Components/InputError';
@@ -24,13 +24,7 @@ export default function Edit({ category, categories }) {
     const availableParents = categories.filter(c => c.id !== category.id);
 
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Edit Category: {category.name}
-                </h2>
-            }
-        >
+        <AdminLayout header={`Edit Category: ${category.name}`}>
             <Head title={`Edit ${category.name}`} />
 
             <div className="py-12">
@@ -108,6 +102,6 @@ export default function Edit({ category, categories }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

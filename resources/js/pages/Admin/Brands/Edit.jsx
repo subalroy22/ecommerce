@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import InputError from '@/Components/InputError';
@@ -20,13 +20,7 @@ export default function Edit({ brand }) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Edit Brand: {brand.name}
-                </h2>
-            }
-        >
+        <AdminLayout header={`Edit Brand: ${brand.name}`}>
             <Head title={`Edit ${brand.name}`} />
 
             <div className="py-12">
@@ -85,6 +79,6 @@ export default function Edit({ brand }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </AdminLayout>
     );
 }

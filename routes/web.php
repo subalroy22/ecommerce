@@ -8,17 +8,31 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [ProductController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = auth()->user();
+    $isAdmin = $user && ($user->role === 'admin' || $user->role === 'manager');
+    
+    $stats = [];
+    
+    if ($isAdmin) {
+        // Get admin statistics
+        $stats = [
+            'total_products' => \App\Models\Product::count(),
+            'active_products' => \App\Models\Product::where('is_active', true)->count(),
+            'low_stock_products' => \App\Models\Product::where('inventory_quantity', '<=', 10)->where('inventory_quantity', '>', 0)->count(),
+            'out_of_stock_products' => \App\Models\Product::where('inventory_quantity', 0)->count(),
+            'total_categories' => \App\Models\Category::count(),
+            'active_categories' => \App\Models\Category::where('is_active', true)->count(),
+            'total_brands' => \App\Models\Brand::count(),
+            'active_brands' => \App\Models\Brand::where('is_active', true)->count(),
+            'total_users' => \App\Models\User::count(),
+            'total_value' => \App\Models\Product::sum(\DB::raw('price * inventory_quantity')),
+        ];
+    }
+    
+    return Inertia::render('Dashboard', ['stats' => $stats]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -27,17 +41,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// Public product catalog routes
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
-Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
-Route::get('/brands/{brand:slug}', [BrandController::class, 'show'])->name('brands.show');
+// Public product detail and category/brand pages
+Route::get('/product/{product:slug}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/category/{category:slug}', [CategoryController::class, 'show'])->name('category.show');
+Route::get('/brand/{brand:slug}', [BrandController::class, 'show'])->name('brand.show');
 
 // Admin routes - protected by role middleware
 Route::middleware(['auth', 'role:admin,manager'])->prefix('admin')->name('admin.')->group(function () {
     // Product management
-    Route::resource('products', ProductController::class)->except(['index', 'show']);
-    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    Route::resource('products', ProductController::class);
     
     // Category management
     Route::resource('categories', CategoryController::class)->except(['show']);
