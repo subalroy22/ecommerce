@@ -10,7 +10,8 @@ use Illuminate\Support\Str;
 class ProductService
 {
     public function __construct(
-        protected ProductRepository $productRepository
+        protected ProductRepository $productRepository,
+        protected ProductImageService $imageService
     ) {}
 
     /**
@@ -41,7 +42,16 @@ class ProductService
                 $data['slug'] = Str::slug($data['name']);
             }
 
+            // Extract images from data
+            $images = $data['images'] ?? [];
+            unset($data['images']);
+
             $product = $this->productRepository->create($data);
+
+            // Handle image uploads
+            if (!empty($images)) {
+                $this->imageService->uploadImages($product, $images);
+            }
 
             DB::commit();
             return $product;
@@ -63,7 +73,22 @@ class ProductService
                 $data['slug'] = Str::slug($data['name']);
             }
 
+            // Extract images and delete_images from data
+            $images = $data['images'] ?? [];
+            $deleteImages = $data['delete_images'] ?? [];
+            unset($data['images'], $data['delete_images']);
+
             $product = $this->productRepository->update($product, $data);
+
+            // Handle image deletions
+            if (!empty($deleteImages)) {
+                $this->imageService->deleteImages($product, $deleteImages);
+            }
+
+            // Handle new image uploads
+            if (!empty($images)) {
+                $this->imageService->uploadImages($product, $images);
+            }
 
             DB::commit();
             return $product;
@@ -78,7 +103,20 @@ class ProductService
      */
     public function deleteProduct(Product $product): bool
     {
-        return $this->productRepository->delete($product);
+        DB::beginTransaction();
+        try {
+            // Delete all product images
+            $this->imageService->deleteAllImages($product);
+
+            // Delete product
+            $result = $this->productRepository->delete($product);
+
+            DB::commit();
+            return $result;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     /**

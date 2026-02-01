@@ -37,6 +37,10 @@ class UpdateProductRequest extends FormRequest
             'weight' => ['nullable', 'numeric', 'min:0'],
             'is_active' => ['boolean'],
             'featured' => ['boolean'],
+            'images' => ['nullable', 'array', 'max:5'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
+            'delete_images' => ['nullable', 'array'],
+            'delete_images.*' => ['integer', 'exists:product_images,id'],
         ];
     }
 }

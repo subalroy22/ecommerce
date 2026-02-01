@@ -4,6 +4,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import ProductCard from '@/Components/ProductCard';
+import ProductImageCarousel from '@/Components/ProductImageCarousel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import { useState } from 'react';
 
@@ -196,19 +197,12 @@ export default function Show({ auth, product, relatedProducts }) {
 
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 lg:grid lg:grid-cols-2 lg:gap-8">
-                            {/* Product Images */}
+                            {/* Product Images Carousel */}
                             <div>
-                                {product.images && product.images.length > 0 ? (
-                                    <img
-                                        src={product.images[0].image_url}
-                                        alt={product.name}
-                                        className="h-96 w-full rounded-lg object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex h-96 items-center justify-center rounded-lg bg-gray-200">
-                                        <span className="text-gray-400">No image available</span>
-                                    </div>
-                                )}
+                                <ProductImageCarousel 
+                                    images={product.images || []} 
+                                    productName={product.name}
+                                />
                             </div>
 
                             {/* Product Details */}
@@ -237,9 +231,9 @@ export default function Show({ auth, product, relatedProducts }) {
 
                                 {/* Stock Status */}
                                 <div className="mt-4">
-                                    {product.stock_quantity > 0 ? (
+                                    {product.inventory_quantity > 0 ? (
                                         <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
-                                            In Stock ({product.stock_quantity} available)
+                                            In Stock ({product.inventory_quantity} available)
                                         </span>
                                     ) : (
                                         <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800">

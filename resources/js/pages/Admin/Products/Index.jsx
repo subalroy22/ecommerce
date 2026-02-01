@@ -68,18 +68,18 @@ export default function Index({ products, filters }) {
         },
         {
             label: 'Stock',
-            field: 'stock_quantity',
+            field: 'inventory_quantity',
             render: (product) => (
                 <span
                     className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                        product.stock_quantity > 10
+                        product.inventory_quantity > 10
                             ? 'bg-green-100 text-green-800'
-                            : product.stock_quantity > 0
+                            : product.inventory_quantity > 0
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-red-100 text-red-800'
                     }`}
                 >
-                    {product.stock_quantity}
+                    {product.inventory_quantity}
                 </span>
             ),
         },

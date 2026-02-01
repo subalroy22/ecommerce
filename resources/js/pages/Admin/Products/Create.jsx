@@ -6,6 +6,7 @@ import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import Checkbox from '@/Components/Checkbox';
+import { useState } from 'react';
 
 export default function Create({ categories, brands }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -16,10 +17,37 @@ export default function Create({ categories, brands }) {
         compare_price: '',
         category_id: '',
         brand_id: '',
-        stock_quantity: '',
+        inventory_quantity: '',
         is_active: true,
         is_featured: false,
+        images: [],
     });
+
+    const [imagePreviews, setImagePreviews] = useState([]);
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        setData('images', files);
+
+        // Generate preview URLs
+        const previews = files.map(file => ({
+            url: URL.createObjectURL(file),
+            name: file.name,
+            size: (file.size / 1024).toFixed(2) + ' KB'
+        }));
+        setImagePreviews(previews);
+    };
+
+    const removeImage = (index) => {
+        const newImages = data.images.filter((_, i) => i !== index);
+        const newPreviews = imagePreviews.filter((_, i) => i !== index);
+        
+        // Revoke the URL to free memory
+        URL.revokeObjectURL(imagePreviews[index].url);
+        
+        setData('images', newImages);
+        setImagePreviews(newPreviews);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -148,16 +176,70 @@ export default function Create({ categories, brands }) {
 
                                 {/* Stock Quantity */}
                                 <div>
-                                    <InputLabel htmlFor="stock_quantity" value="Stock Quantity *" />
+                                    <InputLabel htmlFor="inventory_quantity" value="Stock Quantity *" />
                                     <TextInput
-                                        id="stock_quantity"
+                                        id="inventory_quantity"
                                         type="number"
-                                        value={data.stock_quantity}
-                                        onChange={(e) => setData('stock_quantity', e.target.value)}
+                                        value={data.inventory_quantity}
+                                        onChange={(e) => setData('inventory_quantity', e.target.value)}
                                         className="mt-1 block w-full"
                                         required
                                     />
-                                    <InputError message={errors.stock_quantity} className="mt-2" />
+                                    <InputError message={errors.inventory_quantity} className="mt-2" />
+                                </div>
+
+                                {/* Product Images */}
+                                <div>
+                                    <InputLabel htmlFor="images" value="Product Images (Max 5)" />
+                                    <input
+                                        id="images"
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        onChange={handleImageChange}
+                                        className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                    />
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Upload up to 5 images. Supported formats: JPEG, PNG, JPG, GIF, WEBP (Max 2MB each)
+                                    </p>
+                                    <InputError message={errors.images} className="mt-2" />
+
+                                    {/* Image Previews */}
+                                    {imagePreviews.length > 0 && (
+                                        <div className="mt-4">
+                                            <p className="mb-2 text-sm font-medium text-gray-700">
+                                                Selected Images ({imagePreviews.length})
+                                            </p>
+                                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                                                {imagePreviews.map((preview, index) => (
+                                                    <div key={index} className="relative group">
+                                                        <img
+                                                            src={preview.url}
+                                                            alt={preview.name}
+                                                            className="h-32 w-full rounded-lg object-cover border-2 border-gray-200"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(index)}
+                                                            className="absolute -right-2 -top-2 rounded-full bg-red-500 p-1.5 text-white shadow-lg hover:bg-red-600 transition"
+                                                        >
+                                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                        {index === 0 && (
+                                                            <span className="absolute bottom-2 left-2 rounded bg-indigo-600 px-2 py-1 text-xs font-medium text-white shadow">
+                                                                Primary
+                                                            </span>
+                                                        )}
+                                                        <div className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
+                                                            {preview.size}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Checkboxes */}
