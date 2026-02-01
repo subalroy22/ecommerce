@@ -1,3 +1,24 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fix for mobile select dropdown overflow */
+@layer base {
+    select {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    select option {
+        max-width: 90vw !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        padding: 8px !important;
+    }
+
+    /* Force select dropdown to respect container */
+    select:focus option {
+        max-width: 90vw !important;
+    }
+}

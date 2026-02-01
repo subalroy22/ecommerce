@@ -39,19 +39,19 @@ export default function ProductFilter({ categories, brands, filters, onFilterCha
     };
 
     return (
-        <div className="rounded-lg bg-white p-6 shadow">
+        <div className="rounded-lg bg-white p-6 shadow overflow-hidden">
             <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
 
-            <div className="mt-6 space-y-6">
+            <div className="mt-6 space-y-6 overflow-hidden">
                 {/* Category Filter */}
-                <div>
+                <div className="overflow-hidden">
                     <label className="block text-sm font-medium text-gray-700">
                         Category
                     </label>
                     <select
                         value={localFilters.category_id}
                         onChange={(e) => handleChange('category_id', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        className="mt-1 block w-full truncate rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 max-w-full"
                     >
                         <option value="">All Categories</option>
                         {categories.map((category) => (
@@ -63,14 +63,14 @@ export default function ProductFilter({ categories, brands, filters, onFilterCha
                 </div>
 
                 {/* Brand Filter */}
-                <div>
+                <div className="overflow-hidden">
                     <label className="block text-sm font-medium text-gray-700">
                         Brand
                     </label>
                     <select
                         value={localFilters.brand_id}
                         onChange={(e) => handleChange('brand_id', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        className="mt-1 block w-full truncate rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 max-w-full"
                     >
                         <option value="">All Brands</option>
                         {brands.map((brand) => (
@@ -92,14 +92,14 @@ export default function ProductFilter({ categories, brands, filters, onFilterCha
                             placeholder="Min"
                             value={localFilters.min_price}
                             onChange={(e) => handleChange('min_price', e.target.value)}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            className="block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         />
                         <input
                             type="number"
                             placeholder="Max"
                             value={localFilters.max_price}
                             onChange={(e) => handleChange('max_price', e.target.value)}
-                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            className="block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         />
                     </div>
                 </div>
@@ -112,7 +112,7 @@ export default function ProductFilter({ categories, brands, filters, onFilterCha
                     <select
                         value={localFilters.in_stock}
                         onChange={(e) => handleChange('in_stock', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        className="mt-1 block w-full truncate rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
                         <option value="">All Products</option>
                         <option value="1">In Stock Only</option>
