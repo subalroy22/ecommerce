@@ -13,7 +13,8 @@ class BrandPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        // Everyone can view brands
+        return true;
     }
 
     /**
@@ -21,7 +22,8 @@ class BrandPolicy
      */
     public function view(User $user, Brand $brand): bool
     {
-        return false;
+        // Everyone can view active brands, admins can view all
+        return $brand->is_active || $user->isAdmin();
     }
 
     /**
@@ -29,7 +31,7 @@ class BrandPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -37,7 +39,7 @@ class BrandPolicy
      */
     public function update(User $user, Brand $brand): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -45,7 +47,7 @@ class BrandPolicy
      */
     public function delete(User $user, Brand $brand): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -53,7 +55,7 @@ class BrandPolicy
      */
     public function restore(User $user, Brand $brand): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     /**
@@ -61,6 +63,6 @@ class BrandPolicy
      */
     public function forceDelete(User $user, Brand $brand): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 }

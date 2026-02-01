@@ -11,7 +11,7 @@ class StoreBrandRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('manage-brands');
     }
 
     /**
@@ -22,7 +22,11 @@ class StoreBrandRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:brands,slug'],
+            'description' => ['nullable', 'string'],
+            'logo' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['boolean'],
         ];
     }
 }

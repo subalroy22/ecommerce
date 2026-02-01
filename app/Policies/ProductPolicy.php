@@ -13,7 +13,8 @@ class ProductPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        // Everyone can view products
+        return true;
     }
 
     /**
@@ -21,7 +22,8 @@ class ProductPolicy
      */
     public function view(User $user, Product $product): bool
     {
-        return false;
+        // Everyone can view active products, admins can view all
+        return $product->is_active || $user->isAdmin();
     }
 
     /**
@@ -29,7 +31,7 @@ class ProductPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -37,7 +39,7 @@ class ProductPolicy
      */
     public function update(User $user, Product $product): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -45,7 +47,7 @@ class ProductPolicy
      */
     public function delete(User $user, Product $product): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -53,7 +55,7 @@ class ProductPolicy
      */
     public function restore(User $user, Product $product): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     /**
@@ -61,6 +63,6 @@ class ProductPolicy
      */
     public function forceDelete(User $user, Product $product): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 }

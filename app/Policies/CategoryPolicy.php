@@ -13,7 +13,8 @@ class CategoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        // Everyone can view categories
+        return true;
     }
 
     /**
@@ -21,7 +22,8 @@ class CategoryPolicy
      */
     public function view(User $user, Category $category): bool
     {
-        return false;
+        // Everyone can view active categories, admins can view all
+        return $category->is_active || $user->isAdmin();
     }
 
     /**
@@ -29,7 +31,7 @@ class CategoryPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -37,7 +39,7 @@ class CategoryPolicy
      */
     public function update(User $user, Category $category): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -45,7 +47,7 @@ class CategoryPolicy
      */
     public function delete(User $user, Category $category): bool
     {
-        return false;
+        return in_array($user->role, ['admin', 'manager']);
     }
 
     /**
@@ -53,7 +55,7 @@ class CategoryPolicy
      */
     public function restore(User $user, Category $category): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 
     /**
@@ -61,6 +63,6 @@ class CategoryPolicy
      */
     public function forceDelete(User $user, Category $category): bool
     {
-        return false;
+        return $user->role === 'admin';
     }
 }

@@ -11,7 +11,7 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('manage-categories');
     }
 
     /**
@@ -21,8 +21,16 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categoryId = $this->route('category')->id;
+
         return [
-            //
+            'parent_id' => ['nullable', 'exists:categories,id'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'slug' => ['nullable', 'string', 'max:255', 'unique:categories,slug,' . $categoryId],
+            'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['boolean'],
+            'sort_order' => ['integer', 'min:0'],
         ];
     }
 }
