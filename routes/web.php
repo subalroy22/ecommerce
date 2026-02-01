@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +25,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Public product catalog routes
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->name('categories.show');
+Route::get('/brands/{brand:slug}', [BrandController::class, 'show'])->name('brands.show');
+
+// Admin routes - protected by role middleware
+Route::middleware(['auth', 'role:admin,manager'])->prefix('admin')->name('admin.')->group(function () {
+    // Product management
+    Route::resource('products', ProductController::class)->except(['index', 'show']);
+    Route::get('products', [ProductController::class, 'index'])->name('products.index');
+    
+    // Category management
+    Route::resource('categories', CategoryController::class)->except(['show']);
+    
+    // Brand management
+    Route::resource('brands', BrandController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';
