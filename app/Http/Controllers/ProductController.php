@@ -8,11 +8,14 @@ use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\CategoryService;
 use App\Services\BrandService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected ProductService $productService,
         protected CategoryService $categoryService,

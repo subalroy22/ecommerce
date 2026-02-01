@@ -7,11 +7,14 @@ use App\Http\Requests\UpdateBrandRequest;
 use App\Models\Brand;
 use App\Services\BrandService;
 use App\Services\ProductService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class BrandController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected BrandService $brandService,
         protected ProductService $productService

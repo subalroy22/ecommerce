@@ -7,11 +7,14 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Services\CategoryService;
 use App\Services\ProductService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
+    use AuthorizesRequests;
+
     public function __construct(
         protected CategoryService $categoryService,
         protected ProductService $productService
