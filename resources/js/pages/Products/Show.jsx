@@ -16,7 +16,7 @@ export default function Show({ auth, product, relatedProducts }) {
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'BDT',
         }).format(price);
     };
 
@@ -236,7 +236,7 @@ export default function Show({ auth, product, relatedProducts }) {
                                             In Stock ({product.inventory_quantity} available)
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800">
+                                        <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800 ring-1 ring-red-300/60 backdrop-blur">
                                             Out of Stock
                                         </span>
                                     )}
@@ -252,7 +252,7 @@ export default function Show({ auth, product, relatedProducts }) {
                                 <div className="mt-8">
                                     {user ? (
                                         <PrimaryButton
-                                            disabled={product.stock_quantity === 0}
+                                            disabled={product.inventory_quantity === 0}
                                             className="w-full justify-center"
                                         >
                                             Add to Cart

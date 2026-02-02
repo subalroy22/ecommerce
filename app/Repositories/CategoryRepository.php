@@ -8,19 +8,41 @@ use Illuminate\Database\Eloquent\Collection;
 class CategoryRepository
 {
     /**
-     * Get all categories.
+     * Get all categories with pagination.
      */
-    public function getAll(array $filters = []): Collection
+    public function getAll(array $filters = [])
     {
         $query = Category::query();
 
         if (isset($filters['is_active'])) {
             $query->where('is_active', $filters['is_active']);
-        } else {
-            $query->active();
         }
 
-        return $query->orderBy('sort_order')->orderBy('name')->get();
+        if (isset($filters['search']) && !empty($filters['search'])) {
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        }
+
+        // Apply sorting
+        $sortBy = $filters['sort_by'] ?? 'sort_order';
+        $sortOrder = $filters['sort_order'] ?? 'asc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        // If not sorting by sort_order, add it as secondary sort
+        if ($sortBy !== 'sort_order') {
+            $query->orderBy('sort_order', 'asc');
+        }
+
+        $perPage = $filters['per_page'] ?? 15;
+
+        return $query->with('parent')->withCount('products')->paginate($perPage);
+    }
+
+    /**
+     * Get all active categories without pagination.
+     */
+    public function getAllActive(): Collection
+    {
+        return Category::active()->orderBy('sort_order')->orderBy('name')->get();
     }
 
     /**

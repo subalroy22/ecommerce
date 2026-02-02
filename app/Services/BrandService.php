@@ -21,6 +21,14 @@ class BrandService
     }
 
     /**
+     * Get all active brands without pagination.
+     */
+    public function getAllActiveBrands()
+    {
+        return $this->brandRepository->getAllActive();
+    }
+
+    /**
      * Get a single brand by ID.
      */
     public function getBrandById(int $id)

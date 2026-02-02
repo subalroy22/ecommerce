@@ -25,7 +25,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['search', 'is_active', 'per_page']);
+        $filters = $request->only(['search', 'is_active', 'per_page', 'sort_by', 'sort_order']);
 
         $categories = $this->categoryService->getAllCategories($filters);
 
@@ -42,7 +42,7 @@ class CategoryController extends Controller
     {
         $this->authorize('create', Category::class);
 
-        $categories = $this->categoryService->getAllCategories(['is_active' => true]);
+        $categories = $this->categoryService->getAllActiveCategories();
 
         return Inertia::render('Admin/Categories/Create', [
             'categories' => $categories,
@@ -65,6 +65,11 @@ class CategoryController extends Controller
      */
     public function show(Category $category, Request $request)
     {
+        // For public storefront, check if category is active
+        if ($request->route()->getName() === 'category.show' && !$category->is_active) {
+            abort(404);
+        }
+
         $category->load(['parent', 'children']);
 
         $filters = $request->only([
@@ -79,6 +84,10 @@ class CategoryController extends Controller
         ]);
 
         $filters['category_id'] = $category->id;
+        // For public storefront, only show active products
+        if ($request->route()->getName() === 'category.show') {
+            $filters['is_active'] = true;
+        }
 
         $products = $this->productService->getAllProducts($filters);
 
@@ -97,7 +106,7 @@ class CategoryController extends Controller
         $this->authorize('update', $category);
 
         $category->load(['parent', 'children']);
-        $categories = $this->categoryService->getAllCategories(['is_active' => true]);
+        $categories = $this->categoryService->getAllActiveCategories();
 
         return Inertia::render('Admin/Categories/Edit', [
             'category' => $category,
