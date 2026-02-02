@@ -22,9 +22,19 @@ class CategoryRepository
             $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
 
+        // Apply sorting
+        $sortBy = $filters['sort_by'] ?? 'sort_order';
+        $sortOrder = $filters['sort_order'] ?? 'asc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        // If not sorting by sort_order, add it as secondary sort
+        if ($sortBy !== 'sort_order') {
+            $query->orderBy('sort_order', 'asc');
+        }
+
         $perPage = $filters['per_page'] ?? 15;
 
-        return $query->orderBy('sort_order')->orderBy('name')->with('parent')->withCount('products')->paginate($perPage);
+        return $query->with('parent')->withCount('products')->paginate($perPage);
     }
 
     /**

@@ -16,7 +16,7 @@ export default function Show({ auth, product, relatedProducts }) {
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'BDT',
         }).format(price);
     };
 

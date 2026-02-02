@@ -2,8 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import DataTable from '@/Components/DataTable';
 import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
-import SecondaryButton from '@/Components/SecondaryButton';
+import AdminSearchBar from '@/Components/AdminSearchBar';
 
 export default function Index({ products, filters }) {
     const handleDelete = (product) => {
@@ -14,10 +13,32 @@ export default function Index({ products, filters }) {
         }
     };
 
+    const handleSearch = (searchTerm) => {
+        if (searchTerm) {
+            router.get(route('admin.products.index'), { search: searchTerm }, {
+                preserveScroll: true,
+            });
+        } else {
+            router.get(route('admin.products.index'), {}, {
+                preserveScroll: true,
+            });
+        }
+    };
+
+    const handleSort = (field, order) => {
+        router.get(route('admin.products.index'), {
+            ...filters,
+            sort_by: field,
+            sort_order: order
+        }, {
+            preserveScroll: true,
+        });
+    };
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'BDT',
         }).format(price);
     };
 
@@ -25,6 +46,7 @@ export default function Index({ products, filters }) {
         {
             label: 'Image',
             field: 'image',
+            sortable: false,
             render: (product) => (
                 <div className="h-12 w-12 overflow-hidden rounded">
                     {product.images && product.images.length > 0 ? (
@@ -44,6 +66,7 @@ export default function Index({ products, filters }) {
         {
             label: 'Name',
             field: 'name',
+            sortable: true,
             render: (product) => (
                 <div>
                     <div className="font-medium text-gray-900">{product.name}</div>
@@ -53,31 +76,34 @@ export default function Index({ products, filters }) {
         },
         {
             label: 'Category',
-            field: 'category',
+            field: 'category_id',
+            sortable: true,
             render: (product) => product.category?.name || '-',
         },
         {
             label: 'Brand',
-            field: 'brand',
+            field: 'brand_id',
+            sortable: true,
             render: (product) => product.brand?.name || '-',
         },
         {
             label: 'Price',
             field: 'price',
+            sortable: true,
             render: (product) => formatPrice(product.price),
         },
         {
             label: 'Stock',
             field: 'inventory_quantity',
+            sortable: true,
             render: (product) => (
                 <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                        product.inventory_quantity > 10
-                            ? 'bg-green-100 text-green-800'
-                            : product.inventory_quantity > 0
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                    }`}
+                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${product.inventory_quantity > 10
+                        ? 'bg-green-100 text-green-800'
+                        : product.inventory_quantity > 0
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
                 >
                     {product.inventory_quantity}
                 </span>
@@ -86,13 +112,14 @@ export default function Index({ products, filters }) {
         {
             label: 'Status',
             field: 'is_active',
+            sortable: true,
+            field: 'is_active',
             render: (product) => (
                 <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                        product.is_active
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                    }`}
+                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${product.is_active
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                        }`}
                 >
                     {product.is_active ? 'Active' : 'Inactive'}
                 </span>
@@ -125,7 +152,14 @@ export default function Index({ products, filters }) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="mb-6 flex justify-end">
+                    <div className="mb-6 flex items-center justify-between gap-4">
+                        <div className="w-80">
+                            <AdminSearchBar
+                                initialValue={filters.search || ''}
+                                onSearch={handleSearch}
+                                placeholder="Search by name, SKU, or description..."
+                            />
+                        </div>
                         <Link href={route('admin.products.create')}>
                             <PrimaryButton>Add Product</PrimaryButton>
                         </Link>
@@ -136,6 +170,9 @@ export default function Index({ products, filters }) {
                                 columns={columns}
                                 data={products.data}
                                 actions={actions}
+                                onSort={handleSort}
+                                sortBy={filters.sort_by}
+                                sortOrder={filters.sort_order}
                             />
 
                             {/* Pagination */}

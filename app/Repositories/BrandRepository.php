@@ -22,9 +22,14 @@ class BrandRepository
             $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
 
+        // Apply sorting
+        $sortBy = $filters['sort_by'] ?? 'name';
+        $sortOrder = $filters['sort_order'] ?? 'asc';
+        $query->orderBy($sortBy, $sortOrder);
+
         $perPage = $filters['per_page'] ?? 15;
 
-        return $query->orderBy('name')->withCount('products')->paginate($perPage);
+        return $query->withCount('products')->paginate($perPage);
     }
 
     /**

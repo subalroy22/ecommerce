@@ -25,7 +25,7 @@ class BrandController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['search', 'is_active', 'per_page']);
+        $filters = $request->only(['search', 'is_active', 'per_page', 'sort_by', 'sort_order']);
 
         $brands = $this->brandService->getAllBrands($filters);
 
