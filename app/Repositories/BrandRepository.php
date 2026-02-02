@@ -8,19 +8,31 @@ use Illuminate\Database\Eloquent\Collection;
 class BrandRepository
 {
     /**
-     * Get all brands.
+     * Get all brands with pagination.
      */
-    public function getAll(array $filters = []): Collection
+    public function getAll(array $filters = [])
     {
         $query = Brand::query();
 
         if (isset($filters['is_active'])) {
             $query->where('is_active', $filters['is_active']);
-        } else {
-            $query->active();
         }
 
-        return $query->orderBy('name')->get();
+        if (isset($filters['search']) && !empty($filters['search'])) {
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
+        }
+
+        $perPage = $filters['per_page'] ?? 15;
+
+        return $query->orderBy('name')->withCount('products')->paginate($perPage);
+    }
+
+    /**
+     * Get all active brands without pagination.
+     */
+    public function getAllActive(): Collection
+    {
+        return Brand::active()->orderBy('name')->get();
     }
 
     /**

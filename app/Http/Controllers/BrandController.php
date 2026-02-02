@@ -61,6 +61,11 @@ class BrandController extends Controller
      */
     public function show(Brand $brand, Request $request)
     {
+        // For public storefront, check if brand is active
+        if ($request->route()->getName() === 'brand.show' && !$brand->is_active) {
+            abort(404);
+        }
+
         $filters = $request->only([
             'search',
             'category_id',
@@ -73,6 +78,10 @@ class BrandController extends Controller
         ]);
 
         $filters['brand_id'] = $brand->id;
+        // For public storefront, only show active products
+        if ($request->route()->getName() === 'brand.show') {
+            $filters['is_active'] = true;
+        }
 
         $products = $this->productService->getAllProducts($filters);
 

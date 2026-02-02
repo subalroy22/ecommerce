@@ -14,11 +14,9 @@ class ProductRepository
     {
         $query = Product::with(['category', 'brand', 'images']);
 
-        // Filter by active status
+        // Filter by active status - only apply if explicitly set
         if (isset($filters['is_active'])) {
             $query->where('is_active', $filters['is_active']);
-        } else {
-            $query->active();
         }
 
         // Filter by category

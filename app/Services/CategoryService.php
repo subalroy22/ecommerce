@@ -22,6 +22,14 @@ class CategoryService
     }
 
     /**
+     * Get all active categories without pagination.
+     */
+    public function getAllActiveCategories()
+    {
+        return $this->categoryRepository->getAllActive();
+    }
+
+    /**
      * Get a single category by ID.
      */
     public function getCategoryById(int $id)

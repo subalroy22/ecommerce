@@ -40,20 +40,21 @@ class ProductController extends Controller
             'per_page'
         ]);
 
-        $products = $this->productService->getAllProducts($filters);
-        
         // Check if this is an admin route by checking the route name
         if ($request->route()->getName() === 'admin.products.index') {
-            // Admin view - return paginated products with relationships
+            // Admin view - show all products (active and inactive)
+            $products = $this->productService->getAllProducts($filters);
             return Inertia::render('Admin/Products/Index', [
                 'products' => $products,
                 'filters' => $filters,
             ]);
         }
         
-        // Home/Storefront view - return products with categories and brands for filtering
-        $categories = $this->categoryService->getAllCategories(['is_active' => true]);
-        $brands = $this->brandService->getAllBrands(['is_active' => true]);
+        // Home/Storefront view - only show active products
+        $filters['is_active'] = true;
+        $products = $this->productService->getAllProducts($filters);
+        $categories = $this->categoryService->getAllActiveCategories();
+        $brands = $this->brandService->getAllActiveBrands();
 
         return Inertia::render('Home', [
             'products' => $products,
@@ -70,8 +71,8 @@ class ProductController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        $categories = $this->categoryService->getAllCategories(['is_active' => true]);
-        $brands = $this->brandService->getAllBrands(['is_active' => true]);
+        $categories = $this->categoryService->getAllActiveCategories();
+        $brands = $this->brandService->getAllActiveBrands();
 
         return Inertia::render('Admin/Products/Create', [
             'categories' => $categories,
@@ -93,9 +94,14 @@ class ProductController extends Controller
     /**
      * Display the specified product.
      */
-    public function show(Product $product)
+    public function show(Product $product, Request $request)
     {
         $product->load(['category', 'brand', 'images']);
+
+        // For public storefront, check if product is active
+        if ($request->route()->getName() === 'product.show' && !$product->is_active) {
+            abort(404);
+        }
 
         // Get related products from same category
         $relatedProducts = Product::where('category_id', $product->category_id)
@@ -119,8 +125,8 @@ class ProductController extends Controller
         $this->authorize('update', $product);
 
         $product->load(['category', 'brand', 'images']);
-        $categories = $this->categoryService->getAllCategories(['is_active' => true]);
-        $brands = $this->brandService->getAllBrands(['is_active' => true]);
+        $categories = $this->categoryService->getAllActiveCategories();
+        $brands = $this->brandService->getAllActiveBrands();
 
         return Inertia::render('Admin/Products/Edit', [
             'product' => $product,
