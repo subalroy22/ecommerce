@@ -29,11 +29,20 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $cartCount = 0;
+        $wishlistCount = 0;
+        if ($request->user()) {
+            $cartCount = $request->user()->cartItems()->count();
+            $wishlistCount = $request->user()->wishlistItems()->count();
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
             ],
+            'cartCount' => $cartCount,
+            'wishlistCount' => $wishlistCount,
         ];
     }
 }

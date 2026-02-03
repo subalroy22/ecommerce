@@ -20,7 +20,7 @@ export default function Dashboard({ stats }) {
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: 'USD',
+            currency: 'BDT',
         }).format(value);
     };
 

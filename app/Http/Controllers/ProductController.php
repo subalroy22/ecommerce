@@ -56,11 +56,21 @@ class ProductController extends Controller
         $categories = $this->categoryService->getAllActiveCategories();
         $brands = $this->brandService->getAllActiveBrands();
 
+        // Get user's cart and wishlist items if authenticated
+        $cartItemIds = [];
+        $wishlistItemIds = [];
+        if ($request->user()) {
+            $cartItemIds = $request->user()->cartItems()->pluck('product_id')->toArray();
+            $wishlistItemIds = $request->user()->wishlistItems()->pluck('product_id')->toArray();
+        }
+
         return Inertia::render('Home', [
             'products' => $products,
             'categories' => $categories,
             'brands' => $brands,
             'filters' => $filters,
+            'cartItemIds' => $cartItemIds,
+            'wishlistItemIds' => $wishlistItemIds,
         ]);
     }
 
@@ -111,9 +121,19 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
+        // Get user's cart and wishlist items if authenticated
+        $cartItemIds = [];
+        $wishlistItemIds = [];
+        if ($request->user()) {
+            $cartItemIds = $request->user()->cartItems()->pluck('product_id')->toArray();
+            $wishlistItemIds = $request->user()->wishlistItems()->pluck('product_id')->toArray();
+        }
+
         return Inertia::render('Products/Show', [
             'product' => $product,
             'relatedProducts' => $relatedProducts,
+            'cartItemIds' => $cartItemIds,
+            'wishlistItemIds' => $wishlistItemIds,
         ]);
     }
 

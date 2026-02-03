@@ -1,10 +1,20 @@
-import { Link } from '@inertiajs/react';
-import { usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import PrimaryButton from './PrimaryButton';
+import { useState, useEffect } from 'react';
 
 export default function ProductCard({ product }) {
-    const { auth } = usePage().props;
+    const { auth, cartItemIds = [], wishlistItemIds = [] } = usePage().props;
     const user = auth.user;
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+    const [isInCart, setIsInCart] = useState(cartItemIds.includes(product.id));
+    const [isInWishlist, setIsInWishlist] = useState(wishlistItemIds.includes(product.id));
+
+    useEffect(() => {
+        // Update state when props change (on page load or refresh)
+        setIsInCart(cartItemIds.includes(product.id));
+        setIsInWishlist(wishlistItemIds.includes(product.id));
+    }, [product.id, cartItemIds, wishlistItemIds]);
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('en-US', {
@@ -13,7 +23,7 @@ export default function ProductCard({ product }) {
         }).format(price);
     };
 
-    const handleAddToCart = (e) => {
+    const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
 
@@ -22,8 +32,72 @@ export default function ProductCard({ product }) {
             return;
         }
 
-        // TODO: Implement add to cart functionality
-        alert('Add to cart functionality will be implemented soon!');
+        setIsAddingToCart(true);
+        try {
+            const response = await fetch(route('cart.toggle'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                },
+                body: JSON.stringify({
+                    product_id: product.id,
+                    quantity: 1,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Toggle the state
+                setIsInCart(!isInCart);
+                // Reload the page to update navbar cart count
+                router.reload();
+            } else {
+                console.error('Failed to toggle cart');
+            }
+        } catch (error) {
+            console.error('Error toggling cart:', error);
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
+    const handleAddToWishlist = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user) {
+            window.location.href = route('login');
+            return;
+        }
+
+        setIsAddingToWishlist(true);
+        try {
+            const response = await fetch(route('wishlist.toggle'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                },
+                body: JSON.stringify({
+                    product_id: product.id,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Toggle the state
+                setIsInWishlist(!isInWishlist);
+                // Reload the page to update navbar wishlist count
+                router.reload();
+            } else {
+                console.error('Failed to toggle wishlist');
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+        } finally {
+            setIsAddingToWishlist(false);
+        }
     };
 
     return (
@@ -45,14 +119,26 @@ export default function ProductCard({ product }) {
 
                     {/* Out of Stock Badge */}
                     {product.inventory_quantity === 0 ? (
-                        <span className="absolute right-2 top-2 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 ring-1 ring-red-300/60 backdrop-blur">
+                        <span className="absolute left-2 top-2 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800 ring-1 ring-red-300/60 backdrop-blur">
                             Out of Stock
                         </span>
                     ) : product.inventory_quantity <= 10 ? (
-                        <span className="absolute right-2 top-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-300/60 backdrop-blur">
+                        <span className="absolute left-2 top-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-300/60 backdrop-blur">
                             Only {product.inventory_quantity} left
                         </span>
                     ) : null}
+
+                    {/* Wishlist Button */}
+                    {user && (
+                        <button
+                            onClick={handleAddToWishlist}
+                            disabled={isAddingToWishlist}
+                            className="absolute right-2 top-2 rounded-full bg-white p-2 shadow hover:bg-gray-100 disabled:opacity-50"
+                            title={isInWishlist ? "In wishlist" : "Add to wishlist"}
+                        >
+                            <i className={`fas fa-heart text-lg ${isInWishlist ? 'text-red-500' : 'text-gray-400'}`}></i>
+                        </button>
+                    )}
                 </div>
 
                 {/* Product Info */}
@@ -84,10 +170,11 @@ export default function ProductCard({ product }) {
             <div className="p-4 pt-0">
                 {user ? (
                     <PrimaryButton
-                        disabled={product.inventory_quantity === 0}
+                        onClick={handleAddToCart}
+                        disabled={product.inventory_quantity === 0 || isAddingToCart}
                         className="w-full justify-center"
                     >
-                        Add to Cart
+                        {isAddingToCart ? (isInCart ? 'Removing...' : 'Adding...') : (isInCart ? 'Remove from Cart' : 'Add to Cart')}
                     </PrimaryButton>
                 ) : (
                     <Link
