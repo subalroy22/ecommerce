@@ -101,4 +101,20 @@ class User extends Authenticatable
     {
         return $query->where('role', $role);
     }
+
+    /**
+     * Get the user's cart items.
+     */
+    public function cartItems()
+    {
+        return $this->hasMany(\App\Models\CartItem::class);
+    }
+
+    /**
+     * Get the user's wishlist items.
+     */
+    public function wishlistItems()
+    {
+        return $this->hasMany(\App\Models\WishlistItem::class);
+    }
 }

@@ -1,18 +1,13 @@
 import { Head, Link, router } from '@inertiajs/react';
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import Navbar from '@/Components/Navbar';
 import ProductCard from '@/Components/ProductCard';
 import ProductFilter from '@/Components/ProductFilter';
 import SearchBar from '@/Components/SearchBar';
 import { useState } from 'react';
 
-export default function Home({ auth, products, categories, brands, filters }) {
-    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+export default function Home({ auth, products, categories, brands, filters, cartItemIds = [], wishlistItemIds = [] }) {
     const [showMobileFilters, setShowMobileFilters] = useState(false);
     const user = auth.user;
-    const isAdmin = user && (user.role === 'admin' || user.role === 'manager');
 
     const handleFilterChange = (newFilters) => {
         router.get(route('home'), newFilters, {
@@ -33,148 +28,7 @@ export default function Home({ auth, products, categories, brands, filters }) {
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Head title="Welcome to Our Store" />
 
-            {/* Modern Navigation */}
-            <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-sm shadow-sm">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/" className="flex items-center space-x-2">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-indigo-600" />
-                                    <span className="hidden text-xl font-bold text-gray-900 sm:block">Store</span>
-                                </Link>
-                            </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                {user && (
-                                    <>
-                                        <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                            Dashboard
-                                        </NavLink>
-                                        {isAdmin && (
-                                            <>
-                                                <NavLink href={route('admin.products.index')} active={route().current('admin.products.*')}>
-                                                    Products
-                                                </NavLink>
-                                                <NavLink href={route('admin.categories.index')} active={route().current('admin.categories.*')}>
-                                                    Categories
-                                                </NavLink>
-                                                <NavLink href={route('admin.brands.index')} active={route().current('admin.brands.*')}>
-                                                    Brands
-                                                </NavLink>
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center sm:space-x-4">
-                            {user ? (
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <button className="flex items-center space-x-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white">
-                                                {user.name.charAt(0).toUpperCase()}
-                                            </div>
-                                            <span>{user.name}</span>
-                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                            </svg>
-                                        </button>
-                                    </Dropdown.Trigger>
-                                    <Dropdown.Content>
-                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            ) : (
-                                <div className="flex items-center space-x-3">
-                                    <Link href={route('login')} className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100">
-                                        Log in
-                                    </Link>
-                                    <Link href={route('register')} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700">
-                                        Sign up
-                                    </Link>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex items-center sm:hidden">
-                            <button
-                                onClick={() => setShowingNavigationDropdown((prev) => !prev)}
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-500"
-                            >
-                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                                    <path className={showingNavigationDropdown ? 'inline-flex' : 'hidden'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Mobile Navigation */}
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' border-t border-gray-200 sm:hidden'}>
-                    <div className="space-y-1 pb-3 pt-2">
-                        {user && (
-                            <>
-                                <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
-                                </ResponsiveNavLink>
-                                {isAdmin && (
-                                    <>
-                                        <ResponsiveNavLink href={route('admin.products.index')} active={route().current('admin.products.*')}>
-                                            Manage Products
-                                        </ResponsiveNavLink>
-                                        <ResponsiveNavLink href={route('admin.categories.index')} active={route().current('admin.categories.*')}>
-                                            Manage Categories
-                                        </ResponsiveNavLink>
-                                        <ResponsiveNavLink href={route('admin.brands.index')} active={route().current('admin.brands.*')}>
-                                            Manage Brands
-                                        </ResponsiveNavLink>
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
-
-                    <div className="border-t border-gray-200 pb-3 pt-4">
-                        {user ? (
-                            <>
-                                <div className="px-4">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white font-medium">
-                                            {user.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <div className="text-base font-medium text-gray-800">{user.name}</div>
-                                            <div className="text-sm text-gray-500">{user.email}</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-3 space-y-1">
-                                    <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
-                                    <ResponsiveNavLink method="post" href={route('logout')} as="button">
-                                        Log Out
-                                    </ResponsiveNavLink>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="space-y-1 px-4">
-                                <Link href={route('login')} className="block rounded-lg bg-gray-100 px-4 py-2 text-center text-sm font-medium text-gray-700">
-                                    Log in
-                                </Link>
-                                <Link href={route('register')} className="block rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white">
-                                    Sign up
-                                </Link>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </nav>
+            <Navbar />
 
             <main className="pb-12">
                 {/* Hero Section with Search */}
@@ -189,8 +43,8 @@ export default function Home({ auth, products, categories, brands, filters }) {
                             </p>
                         </div>
                         <div className="mx-auto mt-8 max-w-2xl">
-                            <SearchBar 
-                                initialValue={filters.search || ''} 
+                            <SearchBar
+                                initialValue={filters.search || ''}
                                 onSearch={handleSearch}
                                 placeholder="Search for products..."
                             />
@@ -284,8 +138,8 @@ export default function Home({ auth, products, categories, brands, filters }) {
                                                             relative inline-flex items-center px-3 py-2 text-sm font-medium transition sm:px-4
                                                             ${index === 0 ? 'rounded-l-lg' : ''}
                                                             ${index === products.links.length - 1 ? 'rounded-r-lg' : ''}
-                                                            ${link.active 
-                                                                ? 'z-10 bg-indigo-600 text-white' 
+                                                            ${link.active
+                                                                ? 'z-10 bg-indigo-600 text-white'
                                                                 : 'bg-white text-gray-700 hover:bg-gray-50'
                                                             }
                                                             ${!link.url ? 'cursor-not-allowed opacity-50' : ''}
