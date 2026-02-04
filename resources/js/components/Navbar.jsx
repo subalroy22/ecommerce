@@ -14,7 +14,7 @@ export default function Navbar() {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <nav className="border-b border-gray-100 bg-white">
+        <nav className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="flex h-16 justify-between">
                     <div className="flex">
@@ -27,18 +27,22 @@ export default function Navbar() {
                         <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                             {user && (
                                 <>
-                                    <NavLink
-                                        href={route('dashboard')}
-                                        active={route().current('dashboard')}
-                                    >
-                                        Dashboard
-                                    </NavLink>
-                                    <NavLink
-                                        href={route('home')}
-                                        active={route().current('home')}
-                                    >
-                                        Store
-                                    </NavLink>
+                                    {isAdmin && (
+                                        <NavLink
+                                            href={route('dashboard')}
+                                            active={route().current('dashboard')}
+                                        >
+                                            Dashboard
+                                        </NavLink>
+                                    )}
+                                    {!isAdmin && (
+                                        <NavLink
+                                            href={route('order.index')}
+                                            active={route().current('order.index')}
+                                        >
+                                            My Orders
+                                        </NavLink>
+                                    )}
                                     {isAdmin && (
                                         <>
                                             <NavLink
@@ -58,6 +62,12 @@ export default function Navbar() {
                                                 active={route().current('admin.brands.*')}
                                             >
                                                 Manage Brands
+                                            </NavLink>
+                                            <NavLink
+                                                href={route('admin.orders.index')}
+                                                active={route().current('admin.orders.*')}
+                                            >
+                                                Manage Orders
                                             </NavLink>
                                         </>
                                     )}
@@ -187,18 +197,22 @@ export default function Navbar() {
                 <div className="space-y-1 pb-3 pt-2">
                     {user && (
                         <>
-                            <ResponsiveNavLink
-                                href={route('dashboard')}
-                                active={route().current('dashboard')}
-                            >
-                                Dashboard
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                href={route('home')}
-                                active={route().current('home')}
-                            >
-                                Store
-                            </ResponsiveNavLink>
+                            {isAdmin && (
+                                <ResponsiveNavLink
+                                    href={route('dashboard')}
+                                    active={route().current('dashboard')}
+                                >
+                                    Dashboard
+                                </ResponsiveNavLink>
+                            )}
+                            {!isAdmin && (
+                                <ResponsiveNavLink
+                                    href={route('order.index')}
+                                    active={route().current('order.index')}
+                                >
+                                    My Orders
+                                </ResponsiveNavLink>
+                            )}
                             {isAdmin && (
                                 <>
                                     <ResponsiveNavLink
@@ -218,6 +232,12 @@ export default function Navbar() {
                                         active={route().current('admin.brands.*')}
                                     >
                                         Manage Brands
+                                    </ResponsiveNavLink>
+                                    <ResponsiveNavLink
+                                        href={route('admin.orders.index')}
+                                        active={route().current('admin.orders.*')}
+                                    >
+                                        Manage Orders
                                     </ResponsiveNavLink>
                                 </>
                             )}

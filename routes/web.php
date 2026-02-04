@@ -3,6 +3,7 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WishlistController;
@@ -31,6 +32,12 @@ Route::get('/dashboard', function () {
             'active_brands' => \App\Models\Brand::where('is_active', true)->count(),
             'total_users' => \App\Models\User::count(),
             'total_value' => \App\Models\Product::sum(\DB::raw('price * inventory_quantity')),
+            'total_orders' => \App\Models\Order::count(),
+            'pending_orders' => \App\Models\Order::where('status', 'pending')->count(),
+            'processing_orders' => \App\Models\Order::where('status', 'processing')->count(),
+            'shipped_orders' => \App\Models\Order::where('status', 'shipped')->count(),
+            'delivered_orders' => \App\Models\Order::where('status', 'delivered')->count(),
+            'total_revenue' => \App\Models\Order::where('payment_status', 'completed')->sum('total'),
         ];
     }
     
@@ -57,6 +64,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/wishlist/{wishlistItemId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
     Route::post('/wishlist/{wishlistItemId}/move-to-cart', [WishlistController::class, 'moveToCart'])->name('wishlist.moveToCart');
     Route::post('/wishlist/clear', [WishlistController::class, 'clear'])->name('wishlist.clear');
+
+    // Order routes
+    Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');
+    Route::post('/orders', [OrderController::class, 'store'])->name('order.store');
+    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
+    Route::get('/orders/{order:order_number}', [OrderController::class, 'show'])->name('order.show');
 });
 
 // Public product detail and category/brand pages
@@ -74,6 +87,13 @@ Route::middleware(['auth', 'role:admin,manager'])->prefix('admin')->name('admin.
     
     // Brand management
     Route::resource('brands', BrandController::class)->except(['show']);
+
+    // Order management
+    Route::get('orders', [OrderController::class, 'adminIndex'])->name('orders.index');
+    Route::get('orders/{order:order_number}', [OrderController::class, 'adminShow'])->name('orders.show');
+    Route::patch('orders/{order:order_number}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::patch('orders/{order:order_number}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.updatePaymentStatus');
+    Route::post('orders/{order:order_number}/refund', [OrderController::class, 'refund'])->name('orders.refund');
 });
 
 require __DIR__.'/auth.php';

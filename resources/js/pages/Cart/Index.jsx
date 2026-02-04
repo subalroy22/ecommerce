@@ -121,13 +121,11 @@ export default function Index({ cart }) {
                                     </div>
 
                                     {/* Checkout button - will be implemented in Task 4 */}
-                                    <button
-                                        disabled
-                                        className="mt-6 w-full rounded-md bg-gray-400 px-4 py-2 text-white cursor-not-allowed"
-                                        title="Checkout coming soon"
-                                    >
-                                        Proceed to Checkout (Coming Soon)
-                                    </button>
+                                    <Link href={route('checkout.index')}>
+                                        <PrimaryButton className="mt-6 w-full justify-center">
+                                            Proceed to Checkout
+                                        </PrimaryButton>
+                                    </Link>
 
                                     <Link href={route('home')}>
                                         <SecondaryButton className="mt-3 w-full justify-center">
