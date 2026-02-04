@@ -24,6 +24,13 @@ export default function Dashboard({ stats }) {
         }).format(value);
     };
 
+    // Calculate percentages for charts
+    const totalOrdersValue = stats?.total_orders || 1;
+    const pendingPercent = stats ? (stats.pending_orders / totalOrdersValue) * 100 : 0;
+    const processingPercent = stats ? (stats.processing_orders / totalOrdersValue) * 100 : 0;
+    const shippedPercent = stats ? (stats.shipped_orders / totalOrdersValue) * 100 : 0;
+    const deliveredPercent = stats ? (stats.delivered_orders / totalOrdersValue) * 100 : 0;
+
     const dashboardContent = (
         <>
             <Head title="Dashboard" />
@@ -38,10 +45,10 @@ export default function Dashboard({ stats }) {
 
                     {isAdmin && stats ? (
                         <>
-                            {/* Stats Grid */}
+                            {/* Stats Grid - Main 4 Cards */}
                             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
                                 {/* Total Products */}
-                                <div className="overflow-hidden rounded-lg bg-white shadow">
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
                                     <div className="p-6">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 rounded-md bg-indigo-500 p-3">
@@ -67,8 +74,35 @@ export default function Dashboard({ stats }) {
                                     </div>
                                 </div>
 
+                                {/* Total Orders */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-orange-500 p-3">
+                                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-gray-500">Total Orders</dt>
+                                                    <dd className="flex items-baseline">
+                                                        <div className="text-2xl font-semibold text-gray-900">{stats.total_orders}</div>
+                                                        <div className="ml-2 text-sm text-gray-600">({stats.pending_orders} pending)</div>
+                                                    </dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gray-50 px-6 py-3">
+                                        <Link href={route('admin.orders.index')} className="text-sm font-medium text-orange-600 hover:text-orange-500">
+                                            Manage orders →
+                                        </Link>
+                                    </div>
+                                </div>
+
                                 {/* Inventory Status */}
-                                <div className="overflow-hidden rounded-lg bg-white shadow">
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
                                     <div className="p-6">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 rounded-md bg-yellow-500 p-3">
@@ -95,7 +129,7 @@ export default function Dashboard({ stats }) {
                                 </div>
 
                                 {/* Categories */}
-                                <div className="overflow-hidden rounded-lg bg-white shadow">
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
                                     <div className="p-6">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 rounded-md bg-green-500 p-3">
@@ -120,9 +154,148 @@ export default function Dashboard({ stats }) {
                                         </Link>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Gradient Cards - Key Metrics */}
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
+                                {/* Total Inventory Value */}
+                                <div className="overflow-hidden rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg hover:shadow-xl transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-white bg-opacity-30 p-3">
+                                                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-blue-100">Total Inventory Value</dt>
+                                                    <dd className="text-3xl font-bold text-white">{formatCurrency(stats.total_value)}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Total Revenue */}
+                                <div className="overflow-hidden rounded-lg bg-gradient-to-r from-green-500 to-green-600 shadow-lg hover:shadow-xl transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-white bg-opacity-30 p-3">
+                                                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-green-100">Total Revenue</dt>
+                                                    <dd className="text-3xl font-bold text-white">{formatCurrency(stats.total_revenue)}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Total Users */}
+                                <div className="overflow-hidden rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 shadow-lg hover:shadow-xl transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-white bg-opacity-30 p-3">
+                                                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-pink-100">Total Users</dt>
+                                                    <dd className="text-3xl font-bold text-white">{stats.total_users}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Order Status Breakdown */}
+                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5 mb-8">
+                                {/* Pending Orders */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-yellow-500 p-3">
+                                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-gray-500">Pending</dt>
+                                                    <dd className="text-2xl font-semibold text-gray-900">{stats.pending_orders}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Processing Orders */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-blue-500 p-3">
+                                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-gray-500">Processing</dt>
+                                                    <dd className="text-2xl font-semibold text-gray-900">{stats.processing_orders}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Shipped Orders */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-purple-500 p-3">
+                                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-gray-500">Shipped</dt>
+                                                    <dd className="text-2xl font-semibold text-gray-900">{stats.shipped_orders}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Delivered Orders */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
+                                    <div className="p-6">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 rounded-md bg-green-500 p-3">
+                                                <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </div>
+                                            <div className="ml-5 w-0 flex-1">
+                                                <dl>
+                                                    <dt className="truncate text-sm font-medium text-gray-500">Delivered</dt>
+                                                    <dd className="text-2xl font-semibold text-gray-900">{stats.delivered_orders}</dd>
+                                                </dl>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 {/* Brands */}
-                                <div className="overflow-hidden rounded-lg bg-white shadow">
+                                <div className="overflow-hidden rounded-lg bg-white shadow hover:shadow-lg transition-shadow">
                                     <div className="p-6">
                                         <div className="flex items-center">
                                             <div className="flex-shrink-0 rounded-md bg-purple-500 p-3">
@@ -141,49 +314,110 @@ export default function Dashboard({ stats }) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="bg-gray-50 px-6 py-3">
-                                        <Link href={route('admin.brands.index')} className="text-sm font-medium text-purple-600 hover:text-purple-500">
-                                            Manage →
-                                        </Link>
-                                    </div>
                                 </div>
                             </div>
 
-                            {/* Additional Stats Row */}
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
-                                {/* Total Inventory Value */}
-                                <div className="overflow-hidden rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg">
+                            {/* Charts Section */}
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
+                                {/* Order Status Distribution Chart */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow">
                                     <div className="p-6">
-                                        <div className="flex items-center">
-                                            <div className="flex-shrink-0 rounded-md bg-white bg-opacity-30 p-3">
-                                                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-6">Order Status Distribution</h3>
+                                        <div className="space-y-4">
+                                            {/* Pending */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Pending</span>
+                                                    <span className="text-sm font-semibold text-yellow-600">{stats.pending_orders}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-yellow-500 h-2 rounded-full transition-all duration-300" style={{ width: `${pendingPercent}%` }}></div>
+                                                </div>
                                             </div>
-                                            <div className="ml-5 w-0 flex-1">
-                                                <dl>
-                                                    <dt className="truncate text-sm font-medium text-blue-100">Total Inventory Value</dt>
-                                                    <dd className="text-3xl font-bold text-white">{formatCurrency(stats.total_value)}</dd>
-                                                </dl>
+
+                                            {/* Processing */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Processing</span>
+                                                    <span className="text-sm font-semibold text-blue-600">{stats.processing_orders}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${processingPercent}%` }}></div>
+                                                </div>
+                                            </div>
+
+                                            {/* Shipped */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Shipped</span>
+                                                    <span className="text-sm font-semibold text-purple-600">{stats.shipped_orders}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-purple-500 h-2 rounded-full transition-all duration-300" style={{ width: `${shippedPercent}%` }}></div>
+                                                </div>
+                                            </div>
+
+                                            {/* Delivered */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Delivered</span>
+                                                    <span className="text-sm font-semibold text-green-600">{stats.delivered_orders}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${deliveredPercent}%` }}></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Total Users */}
-                                <div className="overflow-hidden rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 shadow-lg">
+                                {/* Inventory Status Chart */}
+                                <div className="overflow-hidden rounded-lg bg-white shadow">
                                     <div className="p-6">
-                                        <div className="flex items-center">
-                                            <div className="flex-shrink-0 rounded-md bg-white bg-opacity-30 p-3">
-                                                <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                                </svg>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-6">Inventory Status</h3>
+                                        <div className="space-y-4">
+                                            {/* Active Products */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Active Products</span>
+                                                    <span className="text-sm font-semibold text-green-600">{stats.active_products}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-green-500 h-2 rounded-full transition-all duration-300" style={{ width: `${(stats.active_products / stats.total_products) * 100}%` }}></div>
+                                                </div>
                                             </div>
-                                            <div className="ml-5 w-0 flex-1">
-                                                <dl>
-                                                    <dt className="truncate text-sm font-medium text-pink-100">Total Users</dt>
-                                                    <dd className="text-3xl font-bold text-white">{stats.total_users}</dd>
-                                                </dl>
+
+                                            {/* Low Stock */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Low Stock</span>
+                                                    <span className="text-sm font-semibold text-yellow-600">{stats.low_stock_products}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-yellow-500 h-2 rounded-full transition-all duration-300" style={{ width: `${(stats.low_stock_products / stats.total_products) * 100}%` }}></div>
+                                                </div>
+                                            </div>
+
+                                            {/* Out of Stock */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Out of Stock</span>
+                                                    <span className="text-sm font-semibold text-red-600">{stats.out_of_stock_products}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-red-500 h-2 rounded-full transition-all duration-300" style={{ width: `${(stats.out_of_stock_products / stats.total_products) * 100}%` }}></div>
+                                                </div>
+                                            </div>
+
+                                            {/* Active Categories */}
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-sm font-medium text-gray-700">Active Categories</span>
+                                                    <span className="text-sm font-semibold text-blue-600">{stats.active_categories}</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div className="bg-blue-500 h-2 rounded-full transition-all duration-300" style={{ width: `${(stats.active_categories / stats.total_categories) * 100}%` }}></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

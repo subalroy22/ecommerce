@@ -37,14 +37,14 @@ export default function AdminLayout({ header, children }) {
             current: route().current('admin.categories.*'),
         },
         {
-            name: 'Brands',
-            href: route('admin.brands.index'),
+            name: 'Orders',
+            href: route('admin.orders.index'),
             icon: (
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
             ),
-            current: route().current('admin.brands.*'),
+            current: route().current('admin.orders.*'),
         },
     ];
 
