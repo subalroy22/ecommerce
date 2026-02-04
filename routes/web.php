@@ -3,9 +3,11 @@
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -13,36 +15,9 @@ use Inertia\Inertia;
 
 Route::get('/', [ProductController::class, 'index'])->name('home');
 
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-    $isAdmin = $user && ($user->role === 'admin' || $user->role === 'manager');
-    
-    $stats = [];
-    
-    if ($isAdmin) {
-        // Get admin statistics
-        $stats = [
-            'total_products' => \App\Models\Product::count(),
-            'active_products' => \App\Models\Product::where('is_active', true)->count(),
-            'low_stock_products' => \App\Models\Product::where('inventory_quantity', '<=', 10)->where('inventory_quantity', '>', 0)->count(),
-            'out_of_stock_products' => \App\Models\Product::where('inventory_quantity', 0)->count(),
-            'total_categories' => \App\Models\Category::count(),
-            'active_categories' => \App\Models\Category::where('is_active', true)->count(),
-            'total_brands' => \App\Models\Brand::count(),
-            'active_brands' => \App\Models\Brand::where('is_active', true)->count(),
-            'total_users' => \App\Models\User::count(),
-            'total_value' => \App\Models\Product::sum(\DB::raw('price * inventory_quantity')),
-            'total_orders' => \App\Models\Order::count(),
-            'pending_orders' => \App\Models\Order::where('status', 'pending')->count(),
-            'processing_orders' => \App\Models\Order::where('status', 'processing')->count(),
-            'shipped_orders' => \App\Models\Order::where('status', 'shipped')->count(),
-            'delivered_orders' => \App\Models\Order::where('status', 'delivered')->count(),
-            'total_revenue' => \App\Models\Order::where('payment_status', 'completed')->sum('total'),
-        ];
-    }
-    
-    return Inertia::render('Dashboard', ['stats' => $stats]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -94,6 +69,15 @@ Route::middleware(['auth', 'role:admin,manager'])->prefix('admin')->name('admin.
     Route::patch('orders/{order:order_number}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::patch('orders/{order:order_number}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.updatePaymentStatus');
     Route::post('orders/{order:order_number}/refund', [OrderController::class, 'refund'])->name('orders.refund');
+
+    // User management (admin only)
+    Route::middleware('role:admin')->group(function () {
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+        Route::patch('users/{user}/status', [UserController::class, 'updateStatus'])->name('users.updateStatus');
+        Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
 });
 
 require __DIR__.'/auth.php';
