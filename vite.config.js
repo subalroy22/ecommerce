@@ -10,4 +10,13 @@ export default defineConfig({
         }),
         react(),
     ],
+    server: {
+        host: '0.0.0.0', // Bind to all interfaces
+        port: 5173,
+        hmr: {
+            port: 5173,
+            host: process.env.VITE_DEV_SERVER_HOST || 'localhost',
+        },
+        cors: true,
+    },
 });
