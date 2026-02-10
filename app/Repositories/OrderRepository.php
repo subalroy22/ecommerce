@@ -12,8 +12,7 @@ class OrderRepository
      */
     public function getAllOrders($perPage = 15, array $filters = [])
     {
-        $query = Order::with('user', 'items.product.images', 'payment')
-            ->orderBy('created_at', 'desc');
+        $query = Order::with('user', 'items.product.images', 'payment');
 
         // Apply filters
         if (!empty($filters['search'])) {
@@ -36,7 +35,7 @@ class OrderRepository
             $query->where('payment_status', $filters['payment_status']);
         }
 
-        // Apply sorting - default to created_at desc if no sort specified
+        // Apply sorting
         if (!empty($filters['sort_by'])) {
             $sortOrder = $filters['sort_order'] ?? 'asc';
             $query->orderBy($filters['sort_by'], $sortOrder);

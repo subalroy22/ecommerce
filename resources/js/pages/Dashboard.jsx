@@ -9,6 +9,7 @@ export default function Dashboard({ stats }) {
     const isAdmin = user && (user.role === 'admin' || user.role === 'manager');
     const topProductsChartRef = useRef(null);
     const salesByTimeChartRef = useRef(null);
+    const orderStatusChartRef = useRef(null);
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-US', {
@@ -123,7 +124,7 @@ export default function Dashboard({ stats }) {
 
             const width = rect.width;
             const height = rect.height;
-            const padding = { top: 30, right: 20, bottom: 30, left: 50 };
+            const padding = { top: 30, right: 20, bottom: 50, left: 50 };
 
             const hourlyData = stats.sales_by_hour;
             const hours = Object.keys(hourlyData).map(h => parseInt(h));
@@ -182,7 +183,7 @@ export default function Dashboard({ stats }) {
 
             hours.forEach((hour, index) => {
                 const x = padding.left + (barSpacing * index) + barSpacing / 2;
-                const y = padding.top + chartHeight + 15;
+                const y = padding.top + chartHeight + 20;
 
                 let displayHour = hour;
                 let period = 'AM';
@@ -195,13 +196,14 @@ export default function Dashboard({ stats }) {
                     }
                 }
 
-                const timeStr = `${displayHour}:00 ${period}`;
+                const timeStr = `${displayHour}:00\n${period}`;
+                const lines = timeStr.split('\n');
 
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(Math.PI / 2);
-                ctx.fillText(timeStr, 0, 0);
-                ctx.restore();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                lines.forEach((line, lineIndex) => {
+                    ctx.fillText(line, x, y + (lineIndex * 10));
+                });
             });
 
             ctx.strokeStyle = '#374151';
@@ -220,6 +222,93 @@ export default function Dashboard({ stats }) {
             ctx.textAlign = 'center';
             ctx.fillText('Orders', 0, 0);
             ctx.restore();
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [stats, isAdmin]);
+
+    // Draw pie chart for order status
+    useEffect(() => {
+        if (!isAdmin || !stats?.order_stats || !orderStatusChartRef.current) return;
+
+        const timer = setTimeout(() => {
+            const canvas = orderStatusChartRef.current;
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+            const centerX = width / 2;
+            const centerY = height / 2 - 40;
+            const radius = Math.min(width, height) / 2 - 70;
+
+            const statuses = [
+                { label: 'Pending', value: stats.order_stats.pending_orders, color: '#F59E0B' },
+                { label: 'Processing', value: stats.order_stats.processing_orders, color: '#3B82F6' },
+                { label: 'Shipped', value: stats.order_stats.shipped_orders, color: '#8B5CF6' },
+                { label: 'Delivered', value: stats.order_stats.delivered_orders, color: '#10B981' },
+                { label: 'Cancelled', value: stats.order_stats.cancelled_orders, color: '#EF4444' },
+            ];
+
+            const total = statuses.reduce((sum, s) => sum + s.value, 0);
+
+            if (total === 0) return;
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+
+            let currentAngle = -Math.PI / 2;
+            statuses.forEach((status) => {
+                const sliceAngle = (status.value / total) * 2 * Math.PI;
+
+                ctx.fillStyle = status.color;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                const labelAngle = currentAngle + sliceAngle / 2;
+                const labelX = centerX + Math.cos(labelAngle) * (radius * 0.65);
+                const labelY = centerY + Math.sin(labelAngle) * (radius * 0.65);
+
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const percentage = ((status.value / total) * 100).toFixed(0);
+                ctx.fillText(`${percentage}%`, labelX, labelY);
+
+                currentAngle += sliceAngle;
+            });
+
+            // Position legend below the pie chart
+            const legendY = height - 90;
+            statuses.forEach((status, index) => {
+                const legendX = 10 + (width / 2.5) * (index % 2);
+                const legendRowY = legendY + (index >= 2 ? 25 : 0) + (index >= 4 ? 25 : 0);
+
+                ctx.fillStyle = status.color;
+                ctx.fillRect(legendX, legendRowY, 12, 12);
+
+                ctx.fillStyle = '#374151';
+                ctx.font = '10px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`${status.label}`, legendX + 18, legendRowY + 10);
+            });
         }, 100);
 
         return () => clearTimeout(timer);
@@ -401,52 +490,23 @@ export default function Dashboard({ stats }) {
 
                                 {/* Customer Conversion */}
                                 <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Conversion</h3>
-                                    <div className="space-y-4">
-                                        {stats.conversion_metrics && (
-                                            <>
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-sm font-medium text-gray-700">Product Views</span>
-                                                        <span className="text-sm font-semibold text-gray-900">{stats.conversion_metrics.product_views}</span>
-                                                    </div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: '100%' }}></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-sm font-medium text-gray-700">Add to Cart</span>
-                                                        <span className="text-sm font-semibold text-gray-900">{stats.conversion_metrics.add_to_cart}</span>
-                                                    </div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                                        <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(stats.conversion_metrics.add_to_cart / stats.conversion_metrics.product_views) * 100}%` }}></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-sm font-medium text-gray-700">Checkout</span>
-                                                        <span className="text-sm font-semibold text-gray-900">{stats.conversion_metrics.checkout}</span>
-                                                    </div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                                        <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(stats.conversion_metrics.checkout / stats.conversion_metrics.product_views) * 100}%` }}></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-sm font-medium text-gray-700">Payment Done</span>
-                                                        <span className="text-sm font-semibold text-gray-900">{stats.conversion_metrics.payment_done}</span>
-                                                    </div>
-                                                    <div className="w-full bg-gray-200 rounded-full h-2">
-                                                        <div className="bg-orange-500 h-2 rounded-full" style={{ width: `${(stats.conversion_metrics.payment_done / stats.conversion_metrics.product_views) * 100}%` }}></div>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status</h3>
+                                    {stats.order_stats ? (
+                                        <div style={{ width: '100%', height: '320px', position: 'relative' }}>
+                                            <canvas
+                                                ref={orderStatusChartRef}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    display: 'block'
+                                                }}
+                                            ></canvas>
+                                        </div>
+                                    ) : (
+                                        <div className="w-full h-80 flex items-center justify-center bg-gray-50 rounded">
+                                            <p className="text-gray-500">No order data available</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

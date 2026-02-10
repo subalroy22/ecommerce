@@ -16,6 +16,9 @@ export default function Index({ orders, filters }) {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
         });
     };
 
@@ -61,6 +64,10 @@ export default function Index({ orders, filters }) {
         }, {
             preserveScroll: true,
         });
+    };
+
+    const handleRowClick = (order) => {
+        router.visit(route('admin.orders.show', order.order_number));
     };
 
     const columns = [
@@ -162,6 +169,7 @@ export default function Index({ orders, filters }) {
                                         onSort={handleSort}
                                         sortBy={filters.sort_by}
                                         sortOrder={filters.sort_order}
+                                        onRowClick={handleRowClick}
                                     />
 
                                     {/* Pagination */}

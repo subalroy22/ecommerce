@@ -166,7 +166,6 @@ class AnalyticsService
     public function getSalesByHour(): array
     {
         $orders = Order::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
-            ->where('created_at', '>=', now()->subDays(1))
             ->groupBy('hour')
             ->orderBy('hour')
             ->get();

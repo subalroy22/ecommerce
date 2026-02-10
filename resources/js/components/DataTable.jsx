@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 
-export default function DataTable({ columns, data, actions, onSort, sortBy, sortOrder }) {
+export default function DataTable({ columns, data, actions, onSort, sortBy, sortOrder, onRowClick }) {
     const handleSort = (field) => {
         if (onSort) {
             // Toggle sort order if clicking the same column
@@ -62,7 +62,11 @@ export default function DataTable({ columns, data, actions, onSort, sortBy, sort
                 <tbody className="divide-y divide-gray-200 bg-white">
                     {data && data.length > 0 ? (
                         data.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="hover:bg-gray-50">
+                            <tr
+                                key={rowIndex}
+                                className={`hover:bg-gray-50 ${onRowClick ? 'cursor-pointer' : ''}`}
+                                onClick={() => onRowClick && onRowClick(row)}
+                            >
                                 {columns.map((column, colIndex) => (
                                     <td
                                         key={colIndex}
@@ -74,7 +78,7 @@ export default function DataTable({ columns, data, actions, onSort, sortBy, sort
                                     </td>
                                 ))}
                                 {actions && (
-                                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+                                    <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                                         <div className="flex justify-end gap-2">
                                             {actions(row)}
                                         </div>
